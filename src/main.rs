@@ -1,7 +1,12 @@
 use std::fs::read_to_string;
 
 type Lens = (String, i32);
-type Boxes = &'static [Vec<&'static Lens>; 255];
+type Boxes = Vec<Vec<Lens>>;
+
+const EMPTY_BOX: Vec<Lens> = Vec::new();
+
+const REMOVE: char = '-';
+const ADD: char = '=';
 
 fn get_sequence(filename: &str) -> Vec<String> {
     read_to_string(filename)
@@ -35,18 +40,42 @@ fn total_focusing_power(boxes: Boxes) -> i32 {
 }
 
 fn organize_lenses(lenses: &Vec<String>) -> Boxes {
-  // TODO
+    let mut boxes: Boxes = vec![EMPTY_BOX; 256];
+    for lens in lenses {
+        let label = lens.chars().take_while(|c| *c != REMOVE && *c != ADD).collect::<String>();
+        let box_number = hash(&label) as usize;
+        if lens.chars().find(|c| *c == ADD).is_some() {
+            let focal_length = lens
+                .chars()
+                .skip_while(|c| !c.is_numeric())
+                .collect::<String>()
+                .parse::<i32>()
+                .unwrap();
+            if let Some(index) = boxes[box_number].iter().position(|l| l.0 == label) {
+                boxes[box_number][index].1 = focal_length;
+            } else {
+                boxes[box_number].push((label, focal_length));
+            }
+        } else if lens.chars().find(|c| *c == REMOVE).is_some() {
+            if let Some(index) = boxes[box_number].iter().position(|l| l.0 == label) {
+                boxes[box_number].remove(index);
+            }
+        } else {
+            panic!("Invalid lens: {}", lens);
+        }
+    }
+    boxes
 }
 
 fn solution_2(filename: &str) -> i32 {
     let lenses = get_sequence(filename);
     let boxes: Boxes = organize_lenses(&lenses);
-    total_focusing_power(&boxes)
+    total_focusing_power(boxes)
 }
 
 fn main() {
     assert_eq!(solution("example.txt"), 1320);
     assert_eq!(solution("input.txt"), 520500);
     assert_eq!(solution_2("example.txt"), 145);
-    assert_eq!(solution_2("input.txt"), 0);
+    assert_eq!(solution_2("input.txt"), 213097);
 }
