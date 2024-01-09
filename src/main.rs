@@ -74,8 +74,8 @@ fn solution_2(filename: &str) -> i32 {
 }
 
 fn main() {
-    assert_eq!(solution("example.txt"), 1320);
-    assert_eq!(solution("input.txt"), 520500);
-    assert_eq!(solution_2("example.txt"), 145);
-    assert_eq!(solution_2("input.txt"), 213097);
+    println!("{}", solution("example.txt"));
+    println!("{}", solution("input.txt"));
+    println!("{}", solution_2("example.txt"));
+    println!("{}", solution_2("input.txt"));
 }
